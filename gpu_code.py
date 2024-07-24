@@ -7,8 +7,13 @@ import dlib
 import gc
 import tensorflow as tf
 import requests
-URL1 = "http://01f5-88-243-144-189.ngrok-free.app/copyfiles"
-URL2 = "http://01f5-88-243-144-189.ngrok-free.app/receive"
+
+URL1 = "https://e5b9-195-46-135-130.ngrok-free.app/copyfiles"
+URL2 = "https://e5b9-195-46-135-130.ngrok-free.app/receive"
+
+#https://e5b9-195-46-135-130.ngrok-free.app
+#URL1 = "http://01f5-88-243-144-189.ngrok-free.app/copyfiles"
+#URL2 = "http://01f5-88-243-144-189.ngrok-free.app/receive"
 
 def convert_to_ls(x, y, width, height, original_width, original_height):
     return x / original_width * 100.0, y / original_height * 100.0, \

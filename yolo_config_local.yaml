@@ -1,0 +1,7 @@
+train: ../mydata/train/images
+val: ../mydata/val/images
+test: ../mydata/test/images
+
+nc: 2
+names: ['Full water',
+'Half water']

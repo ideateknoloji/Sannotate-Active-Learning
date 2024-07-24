@@ -7,8 +7,21 @@ from PIL import Image
 app = Flask(__name__)
 import json
 import dlib
-URL1 = "http://3aec-88-243-155-119.ngrok-free.app/copyfiles"  # url of local webhook server running on localhost on PC. This should NGROK link for local webhook
-URL2 = "http://3aec-88-243-155-119.ngrok-free.app/receive"
+
+        
+import torch
+from torch.utils.data import DataLoader
+from torchvision import datasets
+import torchvision.transforms as transforms
+from yolov5 import YOLOv5 
+from ultralytics import YOLO
+
+URL1 = "https://e5b9-195-46-135-130.ngrok-free.app/copyfiles"  # url of local webhook server running on localhost on PC. This should NGROK link for local webhook
+URL2 = "https://e5b9-195-46-135-130.ngrok-free.app/receive"
+#https://565b-195-46-135-130.ngrok-free.app
+#URL1 = "http://3aec-88-243-155-119.ngrok-free.app/copyfiles"  # url of local webhook server running on localhost on PC. This should NGROK link for local webhook
+#URL2 = "http://3aec-88-243-155-119.ngrok-free.app/receive"
+
 import gc
 import tensorflow as tf
 def convert_to_ls(x, y, width, height, original_width, original_height):
@@ -26,6 +39,78 @@ def delete_files(folder):
         except Exception as e:
             print(f'Failed to delete {file_path}: {e}')
 
+"""
+def training_Yolo_model():
+    # Veri seti ve yükleyici tanımlama
+
+
+    train_path = 'train_media/'
+    #bu değişebilir dikkat et
+
+
+
+    batch_size = 8
+
+    # Veri setini yükleyiciye yükleme
+    train_dataset = datasets.ImageFolder(
+        root=train_path,
+        transform=transforms.Compose([
+            transforms.Resize((416, 416)),
+            transforms.ToTensor(),
+        ])
+    )
+    train_loader = DataLoader(
+        dataset=train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+    )
+
+    # Modeli tanımlama ve eğitim
+    model =   YOLOv5.load_model()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    criterion = YOLOLoss(
+        num_classes= 2,  # Veri setindeki sınıf sayısı
+        anchors=anchors,          # YOLOv5'de kullanılacak anchor boxları
+        reduction="mean",         # Kayıp fonksiyonu azaltma yöntemi
+    )
+
+    num_epochs = 10
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    for epoch in range(num_epochs):
+        for batch_idx, (data, targets) in enumerate(train_loader):
+            data = data.to(device)
+            targets = targets.to(device)
+
+            # Model eğitimi
+            optimizer.zero_grad()
+            outputs = model(data)
+            loss = criterion(outputs, targets)
+            loss.backward()
+            optimizer.step()
+
+            if batch_idx % 100 == 0:
+                print(f'Epoch [{epoch}/{num_epochs}], Batch [{batch_idx}/{len(train_loader)}], Loss: {loss.item()}')
+
+    # Eğitim sonrası modeli kaydetme
+    torch.save(model.state_dict(), 'yolo_model.pth')
+
+"""
+
+def train_yolo5():
+    # Load a COCO-pretrained YOLOv5n model
+    model = YOLO("yolov5n.pt")
+
+    # Display model information (optional)
+    model.info()
+
+    # Train the model on the COCO8 example dataset for 100 epochs
+    results = model.train(data="coco8.yaml", epochs=100, imgsz=640)
+
+    
+
+
 @app.route("/",methods=["POST"])
 def receive_webhook():
     """
@@ -36,6 +121,11 @@ def receive_webhook():
         # get the data from the request
         data = request.get_json()
         print(data)
+
+
+
+    #print("Yolo training has started!!!!!!!")
+    #training_Yolo_model()
     
     
     # transform annotations to TFRecord
@@ -136,7 +226,6 @@ def receive_webhook():
     tf.keras.backend.clear_session()
     gc.collect()
     return "Success"
-
 
 
 if __name__ == '__main__':

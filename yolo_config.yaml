@@ -1,0 +1,7 @@
+train: ../train_media/train/images
+val: ../train_media/val/images
+test: ../train_media/test/images
+
+nc: 2
+names: ['Full water',
+'Half water']

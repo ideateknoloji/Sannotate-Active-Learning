@@ -4,7 +4,6 @@ import pandas as pd
 import os
 from pprint import pprint
 import paramiko
-import yaml
 app = Flask(__name__)
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -18,10 +17,10 @@ else:
     df = pd.read_csv("annotations.csv", error_bad_lines=False)
 
 request_count = 0
-limit =  3
+limit =  2
 annotations = []
 
-def create_yolo_annotation(image_path, labels, x, y, width, height,detector):
+def create_yolo_annotation(image_path, labels, x, y, width, height):
     img_width, img_height = request.get_json()["annotation"]["result"][0]["original_width"], request.get_json()["annotation"]["result"][0]["original_height"]
     x_center = (x + width / 2) / img_width
     y_center = (y + height / 2) / img_height
@@ -30,13 +29,9 @@ def create_yolo_annotation(image_path, labels, x, y, width, height,detector):
 
     annotation_line = f"{labels} {x_center} {y_center} {normalized_width} {normalized_height}\n"
     
-    if(detector == 0):
-        # Write to YOLO format file
-        with open("annotations" + ".txt", "a") as f:
-            f.write(annotation_line)
-    else:
-        with open("annotations_valid" + ".txt", "a") as f:
-            f.write(annotation_line)
+    # Write to YOLO format file
+    with open("annotates/"+image_path + ".txt", "a") as f:
+        f.write(annotation_line)
 
 
 @app.route("/",methods=["POST"])
@@ -92,13 +87,10 @@ def receive_webhook(df=df):
 
         labels = request.get_json()["annotation"]["result"][i]["value"]["rectanglelabels"][0]
 
-        if(i != num_annotations-1):
-            # YOLO formatına dönüştürme ve dosyaya yazma
-            create_yolo_annotation(path[15:-5], labels, int(pixel_x), int(pixel_y), int(pixel_width), int(pixel_height),0)
-        else:
-            create_yolo_annotation(path[15:-5], labels, int(pixel_x), int(pixel_y), int(pixel_width), int(pixel_height),1)
+        # YOLO formatına dönüştürme ve dosyaya yazma
+        create_yolo_annotation(path[15:-5], labels, int(pixel_x), int(pixel_y), int(pixel_width), int(pixel_height))
 
-        #sftp.put("annotates/" + path[15:-5] + ".txt","train_media/annotates/" + path[15:-5] + ".txt")
+        #sftp.put("annotates/" + path[15:-5] + ".txt","train_media/annotates" + path[15:-5] + ".txt")
 
 
         objects.append({"filename": path.split("/")[-1], "width": request.get_json()["annotation"]["result"][i]["original_width"], "height": request.get_json()["annotation"]["result"][i]["original_height"], "class": labels, "xmin": int(pixel_x),"ymin": int(pixel_y),  "xmax": int(pixel_x + pixel_width), "ymax": int(pixel_y + pixel_height)})
@@ -112,7 +104,7 @@ def receive_webhook(df=df):
     #df = df.append(objects, ignore_index = False)
     
 
-
+    
             
     # save the dataframe to a csv file
     #df.to_csv("annotations.csv", mode="a", index=False, header = not os.path.exists("annotations.csv"))
@@ -197,8 +189,8 @@ def receive_webhook(df=df):
         sftp.put('train.csv', "train_media/" + "train.csv")
 
         
-        sftp.put('annotations.txt',"train_media/annotates" + "annotations.txt")
-        sftp.put('annotations_valid.txt',"train_media/annotates" + "annotations_valid.txt")
+        #sftp.put('annotations.txt',"train_media/annotates" + "annotations.txt")
+
 
         #sftp.put('test.csv', "test_media/" + "test.csv")
 
@@ -215,24 +207,12 @@ def receive_webhook(df=df):
 
 
 
-        yaml_content = {
-        'train': 'train_media/annotations.txt',  # Eğitim veri seti yolunu ayarlayın
-        'val': 'test_media/annotations_valid.txt',  # Test veri seti yolunu ayarlayın
-        'nc': 2,  # Sınıf sayısı
-        'names': ['Full water','Half water']  # Sınıf isimleri
-        }
 
-        # .yaml dosyasını oluştur
-        with open('yolo_config.yaml', 'w') as yaml_file:
-            yaml.dump(yaml_content, yaml_file, default_flow_style=False)
-
-        # .yaml dosyasını sunucuya gönder
-        sftp.put('yolo_config.yaml', 'yolo_config.yaml')
 
 
         responce = requests.post("http://10.10.10.165:5000", json= {"message": "generate TF record"})
 
-        
+
 
 
 

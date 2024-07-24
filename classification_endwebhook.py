@@ -7,12 +7,28 @@ import numpy as np
 import requests
 from sklearn.metrics import recall_score, f1_score, precision_score, accuracy_score
 import tensorflow as tf
-import tensorflow.keras as K
-from tensorflow.keras.models import load_model
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from tensorflow.keras import layers, models, losses, optimizers
-from tensorflow.keras.applications import VGG16
-from tensorflow.keras.utils import to_categorical
+from tensorflow.python.keras.layers import Dense
+
+from tensorflow.python import keras as K
+from tensorflow.python.keras.models import load_model
+from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint , ReduceLROnPlateau 
+from tensorflow.python.keras import layers , models , losses , optimizers 
+from keras.applications.vgg16 import VGG16
+from tensorflow.python.keras.utils import to_categorical
+
+
+
+#import tensorflow.keras as K
+#from tensorflow.keras.models import load_model
+#from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+#from tensorflow.keras import layers, models, losses, optimizers
+
+
+#from tensorflow.keras.applications import VGG16
+
+
+#from tensorflow.keras.utils import to_categorical
+
 from sklearn.model_selection import train_test_split
 mirrored_strategy = tf.distribute.MirroredStrategy()
 import matplotlib.pyplot as plt
@@ -24,7 +40,9 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 
 
-SAVE_PATH = "C:\\Project Sannotate\\JELAL\\classification"
+#SAVE_PATH = "C:\\Project Sannotate\\JELAL\\classification"
+
+SAVE_PATH = "C:\Users\ufuk.cefaker\Desktop\S-Annotate\Sannotate-Active-Learning-main\classification"
 
 # TODO: 1) change dataset size returned in initialize_dataset_v2() function =================== DONE
 #       2) change model in VGG16_Model_Type3() function ======================================= DONE
@@ -81,7 +99,19 @@ def unannotated_dataset(path):
         labels.append(label)
     return np.array(data), np.array(labels)
 
+"""
 class CustomCallback(K.callbacks.Callback):
+    def on_train_end(self, epoch, logs=None):
+        logs = logs or {}
+        keys = list(logs.keys())
+        accuracy = logs.get("accuracy")
+        loss = logs.get("loss")
+        print("Finished training == got log keys: {}".format(keys))
+        with open("training_metrics.txt","a") as f:
+            f.write(f"Epoch {epoch}: accuracy = {accuracy}, loss ={loss}\n")
+"""
+
+class CustomCallback(tf.keras.callbacks.Callback):
     def on_train_end(self, epoch, logs=None):
         logs = logs or {}
         keys = list(logs.keys())

@@ -3,7 +3,9 @@ import paramiko
 import json
 import shutil
 LABEL_STUDIO_URL = 'http://localhost:8080/'
-LABEL_STUDIO_API_KEY = '1e68a65e957636b82e6bf92dad1e8c8a4cb14dd0'
+LABEL_STUDIO_API_KEY = '6d8ad45851a711b361dd3c4330f01b8358109b9d'
+
+#LABEL_STUDIO_API_KEY = '1e68a65e957636b82e6bf92dad1e8c8a4cb14dd0'
 from label_studio_sdk import Client
 ls = Client(url=LABEL_STUDIO_URL, api_key=LABEL_STUDIO_API_KEY)
 
